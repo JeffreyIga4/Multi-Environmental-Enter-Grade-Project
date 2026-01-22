@@ -17,6 +17,10 @@ variable "keyvault_name" {
   type = string
 }
 
+variable "SUB_ID" {
+  type = string
+}
+
 variable "node_pool_name" {
   
 }
