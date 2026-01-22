@@ -4,7 +4,7 @@ resource "azurerm_resource_group" "rg1" {
 }
 
 module "ServicePrincipal" {
-  source                 = "./modules/ServicePrincipal"
+  source                 = "../modules/ServicePrincipal"
   service_principal_name = var.service_principal_name
 
   depends_on = [
@@ -24,7 +24,7 @@ resource "azurerm_role_assignment" "rolespn" {
 }
 
 module "keyvault" {
-  source                      = "./modules/keyvault"
+  source                      = "../modules/keyvault"
   keyvault_name               = var.keyvault_name
   location                    = var.location
   resource_group_name         = var.rgname
@@ -49,7 +49,7 @@ resource "azurerm_key_vault_secret" "example" {
 
 #create Azure Kubernetes Service
 module "aks" {
-  source                 = "./modules/aks/"
+  source                 = "../modules/aks/"
   service_principal_name = var.service_principal_name
   client_id              = module.ServicePrincipal.client_id
   client_secret          = module.ServicePrincipal.client_secret
@@ -57,6 +57,7 @@ module "aks" {
   resource_group_name    = var.rgname
   cluster_name           = var.cluster_name
   node_pool_name         = var.node_pool_name
+  ssh_public_key = var.ssh_public_key
 
   depends_on = [
     module.ServicePrincipal
