@@ -8,7 +8,7 @@ variable "service_principal_name" {
 }
 
 variable "ssh_public_key" {
-  type = string
+  default = "../.ssh/id_rsa.pub"
 }
 
 variable "client_id" {}

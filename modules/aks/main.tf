@@ -11,6 +11,7 @@ resource "azurerm_kubernetes_cluster" "aks-cluster" {
   dns_prefix            = "${var.resource_group_name}-cluster"           
   kubernetes_version    =  data.azurerm_kubernetes_service_versions.current.latest_version
   node_resource_group = "${var.resource_group_name}-nrg"
+  oidc_issuer_enabled = true
   
   default_node_pool {
     name       = var.node_pool_name
@@ -29,13 +30,11 @@ resource "azurerm_kubernetes_cluster" "aks-cluster" {
     client_secret = var.client_secret
   }
 
-
   linux_profile {
     admin_username = "ubuntu"
-
-  ssh_key {
-    key_data = var.ssh_public_key
-  }
+    ssh_key {
+        key_data = trimspace(file(var.ssh_public_key))
+    }
   }
 
   network_profile {

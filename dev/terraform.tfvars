@@ -1,0 +1,6 @@
+rgname                 = "dev-jeff-rg"
+service_principal_name = "dev-jeff-spn"
+keyvault_name          = "dev-jeff-kv-101"
+SUB_ID = "your-subscription-id-here"
+cluster_name = "dev-jeff-cluster"
+node_pool_name = "devnp"

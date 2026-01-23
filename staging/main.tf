@@ -57,7 +57,6 @@ module "aks" {
   resource_group_name    = var.rgname
   cluster_name           = var.cluster_name
   node_pool_name         = var.node_pool_name
-  ssh_public_key = var.ssh_public_key
 
   depends_on = [
     module.ServicePrincipal

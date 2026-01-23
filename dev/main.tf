@@ -23,6 +23,17 @@ resource "azurerm_role_assignment" "rolespn" {
   ]
 }
 
+resource "azurerm_role_assignment" "rolekv" {
+
+  scope                = "/subscriptions/${var.SUB_ID}"
+  role_definition_name = "Key Vault Contributor"
+  principal_id         = module.ServicePrincipal.service_principal_object_id
+
+  depends_on = [
+    module.ServicePrincipal
+  ]
+}
+
 module "keyvault" {
   source                      = "../modules/keyvault"
   keyvault_name               = var.keyvault_name
@@ -33,7 +44,7 @@ module "keyvault" {
   service_principal_tenant_id = module.ServicePrincipal.service_principal_tenant_id
 
   depends_on = [
-    module.ServicePrincipal
+    azurerm_role_assignment.rolekv
   ]
 }
 
@@ -57,8 +68,6 @@ module "aks" {
   resource_group_name    = var.rgname
   cluster_name = var.cluster_name
   node_pool_name = var.node_pool_name
-  ssh_public_key = var.ssh_public_key
-
 
   depends_on = [
     module.ServicePrincipal

@@ -1,0 +1,6 @@
+rgname                 = "stage-jeff-rg"
+service_principal_name = "stage-jeff-spn"
+keyvault_name          = "stage-jeff-kv-101"
+SUB_ID = "your-subscription-id"
+cluster_name = "stage-jeff-cluster"
+node_pool_name = "stagenp"

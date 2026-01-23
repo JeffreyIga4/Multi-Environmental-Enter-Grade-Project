@@ -1,0 +1,108 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+      - main
+      - feature/*
+
+  paths:
+   include:
+     - dev/*
+     - staging/*
+     - modules/*
+     - pipeline/*
+     - azure-pipelines.yml
+
+stages:
+- stage: validate
+  jobs:
+  - job: tf_validate
+    pool:
+      name: SelfHostedUbuntu
+    steps:
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: 'latest'
+
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/dev'
+        backendAzureRmUseEntraIdForAuthentication: false
+        backendServiceArm: 'Azure subscription 1(d01cfca0-e36c-4a9c-afaf-73093d78a2d6)'
+        backendAzureRmResourceGroupName: 'terraform-state-rg'
+        backendAzureRmStorageAccountName: 'tfdevbackend2026jeff'
+        backendAzureRmContainerName: 'tfstate'
+        backendAzureRmKey: 'dev.terraform.tfstate'
+
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'validate'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/dev'
+
+- stage: Dev_deploy
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+  - job: terraform_apply_dev
+    pool:
+      name: SelfHostedUbuntu
+    steps:
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: 'latest'
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/dev'
+        backendAzureRmUseEntraIdForAuthentication: false
+        backendServiceArm: 'Azure subscription 1(d01cfca0-e36c-4a9c-afaf-73093d78a2d6)'
+        backendAzureRmResourceGroupName: 'terraform-state-rg'
+        backendAzureRmStorageAccountName: 'tfdevbackend2026jeff'
+        backendAzureRmContainerName: 'tfstate'
+        backendAzureRmKey: 'dev.terraform.tfstate'
+
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'apply'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/dev'
+        commandOptions: '--auto-approve'
+        environmentServiceNameAzureRM: 'Azure subscription 1(d01cfca0-e36c-4a9c-afaf-73093d78a2d6)'
+
+- stage: stage_deploy
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  jobs:
+  - job: terraform_apply_stage
+    pool: 
+      name: SelfHostedUbuntu
+    steps:
+    - task: TerraformInstaller@1
+      inputs:
+        terraformVersion: 'latest'
+
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/staging'
+        backendAzureRmUseEntraIdForAuthentication: false
+        backendServiceArm: 'Azure subscription 1(d01cfca0-e36c-4a9c-afaf-73093d78a2d6)'
+        backendAzureRmResourceGroupName: 'terraform-state-rg'
+        backendAzureRmStorageAccountName: 'tfstagebackend2026jeff'
+        backendAzureRmContainerName: 'tfstate'
+        backendAzureRmKey: 'stage.terraform.tfstate'
+    
+    - task: TerraformTask@5
+      inputs:
+        provider: 'azurerm'
+        command: 'apply'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/staging'
+        commandOptions: '--auto-approve'
+        environmentServiceNameAzureRM: 'Azure subscription 1(d01cfca0-e36c-4a9c-afaf-73093d78a2d6)'
